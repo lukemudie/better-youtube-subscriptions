@@ -1,2 +1,5 @@
 # ignore client secret file
 client_secret.json
+
+# ignore saved token
+token.pickle
