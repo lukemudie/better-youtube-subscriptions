@@ -1,1 +1,1 @@
-# better-youtube-subscriptions
+# random-youtube-video
