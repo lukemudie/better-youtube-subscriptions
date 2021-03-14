@@ -86,10 +86,12 @@ def main():
     
     i = 1
     for item in playlist_response['items']:
-        print("https://www.youtube.com/watch?v=" + item['contentDetails']['videoId'])
+        vid_id = item['contentDetails']['videoId']
+        vid_link = f"https://youtu.be/{vid_id}"
+        print(vid_link)
         if i == rand_vid_num:
             print(" - the chosen one")
-            webbrowser.open("https://www.youtube.com/watch?v=" + item['contentDetails']['videoId'])
+            webbrowser.open(vid_link)
         print()
         i += 1
         
