@@ -1,34 +1,5 @@
-import os
-import pickle
 
-import google_auth_oauthlib.flow
-from google.auth.transport.requests import Request
-import googleapiclient.discovery
-import googleapiclient.errors
-
-scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
-
-from random import randint
-import webbrowser
-
-def main():
-    # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-    api_service_name = "youtube"
-    api_version = "v3"
-    client_secrets_file = "client_secret.json"
-    
-    # load in credentials from a pickle file if it exists
-    credentials = get_credentials(client_secrets_file)
-    
-    youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
-        
-    # supply a channel ID and get the url of a random video in its "uploads" playlist
-    vid_url = get_random_video_from_channel("UC1Y8isEO4vRNqcFXXEjtC-Q", youtube)
-    #vid_url = get_random_video_from_channel("UCHZqZf6nbTu3hnRtOJwUtkA", youtube)
+    vid_url = get_random_video_from_channel("UCHZqZf6nbTu3hnRtOJwUtkA", youtube) # Kara
     webbrowser.open(vid_url)
 
 def get_credentials(file):
@@ -74,9 +45,13 @@ def get_random_video_from_channel(channel_id, youtube):
     
     # need to generate a random number between 1 and videoCount, then we know we only need to page up to that point
     max_vids = int(channel_response['items'][0]['statistics']['videoCount'])
-    ### SETTING MAX NUMBER TEMPORARILY TO 10 FOR TESTING ###
-    max_vids = 10
     
+    # there is a limit in the youtube api that prevents new pages being return after 500 results, so putting
+    # the cap here to prevent any errors that may arise from trying to access things we're not allowed
+    if max_vids > 500:
+        max_vids = 500
+    
+    # don't request so many items if we don't need to (50 is the max per page allowed)
     if max_vids >= 50:
         num_vids_to_pull = 50
     else:
@@ -88,7 +63,9 @@ def get_random_video_from_channel(channel_id, youtube):
     print("number of videos: " + str(max_vids))
     print("chosen video number: " + str(rand_vid_num))
     
-    # getting the uploads playlist information so that we can get the url of the chosen random video
+    all_vid_links = []
+    
+    # get the first up to 50 videos since we don't need a pageToken
     playlist_request = youtube.playlistItems().list(
         part="contentDetails",
         playlistId=upload_playlist_id,
@@ -97,16 +74,46 @@ def get_random_video_from_channel(channel_id, youtube):
     
     playlist_response = playlist_request.execute()
     
-    i = 1
     for item in playlist_response['items']:
         vid_id = item['contentDetails']['videoId']
         vid_link = f"https://youtu.be/{vid_id}"
-        print(vid_link)
-        if i == rand_vid_num:
-            print(" - the chosen one")
-            return vid_link
-        print()
-        i += 1
+        all_vid_links.append(vid_link)
+    
+    # if there are more than 50 videos and the chosen video is not in the first 50, we need more pages of results
+    if (max_vids > num_vids_to_pull) & (rand_vid_num > num_vids_to_pull):
+        i = num_vids_to_pull
+        
+        while i < rand_vid_num:
+            next_page = playlist_response['nextPageToken']
+        
+            playlist_request = youtube.playlistItems().list(
+                part="contentDetails",
+                playlistId=upload_playlist_id,
+                maxResults=num_vids_to_pull,
+                pageToken=next_page
+            )
+            
+            playlist_response = playlist_request.execute()
+            
+            for item in playlist_response['items']:
+                vid_id = item['contentDetails']['videoId']
+                vid_link = f"https://youtu.be/{vid_id}"
+                all_vid_links.append(vid_link)
+            
+            i += num_vids_to_pull
+    
+    return(all_vid_links[rand_vid_num + 1])
+    
+    # i = 1
+    # for item in playlist_response['items']:
+        # vid_id = item['contentDetails']['videoId']
+        # vid_link = f"https://youtu.be/{vid_id}"
+        # print(vid_link)
+        # if i == rand_vid_num:
+            # print(" - the chosen one")
+            # return vid_link
+        # print()
+        # i += 1
      
     # need to get nextPageToken and pass in as a pageToken to get next n results    
 
