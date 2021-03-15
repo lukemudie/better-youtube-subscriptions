@@ -1,4 +1,31 @@
+import os
+import pickle
 
+import google_auth_oauthlib.flow
+from google.auth.transport.requests import Request
+import googleapiclient.discovery
+import googleapiclient.errors
+
+scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
+
+from random import randint
+import webbrowser
+
+def main():
+    # Disable OAuthlib's HTTPS verification when running locally.
+    # *DO NOT* leave this option enabled in production.
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "client_secret.json"
+    
+    # load in credentials from a pickle file if it exists
+    credentials = get_credentials(client_secrets_file)
+    
+    youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
+        
+    # supply a channel ID and get the url of a random video in its "uploads" playlist
     vid_url = get_random_video_from_channel("UCHZqZf6nbTu3hnRtOJwUtkA", youtube) # Kara
     webbrowser.open(vid_url)
 
