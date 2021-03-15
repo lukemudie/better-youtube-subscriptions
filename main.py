@@ -21,31 +21,7 @@ def main():
     client_secrets_file = "client_secret.json"
     
     # load in credentials from a pickle file if it exists
-    credentials = None
-    
-    if os.path.exists("token.pickle"):
-        print("Loading credentials from file...")
-        with open("token.pickle", "rb") as token:
-            credentials = pickle.load(token)
-
-    # if there are no valid credentials saved then either refresh the token or log in
-    if not credentials or not credentials.valid:
-        if credentials and credentials.expired and credentials.refresh_token:
-            print("Refreshing access token...")
-            credentials.refresh(Request())
-        else:
-            print("Fetching new tokens...")
-            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-                client_secrets_file,
-                scopes
-            )
-            
-            flow.run_local_server(port=8080, prompt="consent")
-            credentials = flow.credentials
-            
-            with open("token.pickle", "wb") as f:
-                print("Saving credentials for future use...")
-                pickle.dump(credentials, f)
+    credentials = get_credentials(client_secrets_file)
     
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
@@ -98,6 +74,36 @@ def main():
     # need to get nextPageToken and pass in as a pageToken to get next n results
     
     # need videoID in https://www.youtube.com/watch?v={videoID}
+
+def get_credentials(file):
+    """gets the credentials using an external json client secrets file"""
+    credentials = None
+    
+    if os.path.exists("token.pickle"):
+        print("Loading credentials from file...")
+        with open("token.pickle", "rb") as token:
+            credentials = pickle.load(token)
+
+    # if there are no valid credentials saved then either refresh the token or log in
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            print("Refreshing access token...")
+            credentials.refresh(Request())
+        else:
+            print("Fetching new tokens...")
+            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+                client_secrets_file,
+                scopes
+            )
+            
+            flow.run_local_server(port=8080, prompt="consent")
+            credentials = flow.credentials
+            
+            with open("token.pickle", "wb") as f:
+                print("Saving credentials for future use...")
+                pickle.dump(credentials, f)
+                
+    return credentials
 
 if __name__ == "__main__":
     main()
