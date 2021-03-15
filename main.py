@@ -27,7 +27,8 @@ def main():
         api_service_name, api_version, credentials=credentials)
         
     # supply a channel ID and get the url of a random video in its "uploads" playlist
-    vid_url = get_random_video_from_channel("UCHZqZf6nbTu3hnRtOJwUtkA", youtube)
+    vid_url = get_random_video_from_channel("UC1Y8isEO4vRNqcFXXEjtC-Q", youtube)
+    #vid_url = get_random_video_from_channel("UCHZqZf6nbTu3hnRtOJwUtkA", youtube)
     webbrowser.open(vid_url)
 
 def get_credentials(file):

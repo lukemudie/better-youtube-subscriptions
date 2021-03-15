@@ -1,5 +1,3 @@
-# ignore client secret file
+# ignore sensitive information like API keys, client_secret, stored tokens etc
 client_secret.json
-
-# ignore saved token
 token.pickle
