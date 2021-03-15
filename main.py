@@ -26,6 +26,7 @@ def main():
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
         
+    # supply a channel ID and get the url of a random video in its "uploads" playlist
     vid_url = get_random_video_from_channel("UCHZqZf6nbTu3hnRtOJwUtkA", youtube)
     webbrowser.open(vid_url)
 
@@ -67,6 +68,9 @@ def get_random_video_from_channel(channel_id, youtube):
     )
     channel_response = channel_request.execute()
     
+    # playlist id to look up when getting the list of videos
+    upload_playlist_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+    
     # need to generate a random number between 1 and videoCount, then we know we only need to page up to that point
     max_vids = int(channel_response['items'][0]['statistics']['videoCount'])
     ### SETTING MAX NUMBER TEMPORARILY TO 10 FOR TESTING ###
@@ -86,7 +90,7 @@ def get_random_video_from_channel(channel_id, youtube):
     # getting the uploads playlist information so that we can get the url of the chosen random video
     playlist_request = youtube.playlistItems().list(
         part="contentDetails",
-        playlistId="UUHZqZf6nbTu3hnRtOJwUtkA",
+        playlistId=upload_playlist_id,
         maxResults=num_vids_to_pull
     )
     
