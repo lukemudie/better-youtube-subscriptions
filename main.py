@@ -25,15 +25,47 @@ def main():
     
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
+        
+    vid_url = get_random_video_from_channel("UCHZqZf6nbTu3hnRtOJwUtkA", youtube)
+    webbrowser.open(vid_url)
 
+def get_credentials(file):
+    """gets the credentials using an external json client secrets file"""
+    credentials = None
+    
+    if os.path.exists("token.pickle"):
+        print("Loading credentials from file...")
+        with open("token.pickle", "rb") as token:
+            credentials = pickle.load(token)
+
+    # if there are no valid credentials saved then either refresh the token or log in
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            print("Refreshing access token...")
+            credentials.refresh(Request())
+        else:
+            print("Fetching new tokens...")
+            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+                client_secrets_file,
+                scopes
+            )
+            
+            flow.run_local_server(port=8080, prompt="consent")
+            credentials = flow.credentials
+            
+            with open("token.pickle", "wb") as f:
+                print("Saving credentials for future use...")
+                pickle.dump(credentials, f)
+                
+    return credentials
+    
+def get_random_video_from_channel(channel_id, youtube):
     # getting the channel information; we need the id of the uploads playlist
     channel_request = youtube.channels().list(
         part="contentDetails,statistics",
-        id="UCHZqZf6nbTu3hnRtOJwUtkA"
+        id=channel_id
     )
     channel_response = channel_request.execute()
-
-    channel_id = channel_response['items'][0]['id']
     
     # need to generate a random number between 1 and videoCount, then we know we only need to page up to that point
     max_vids = int(channel_response['items'][0]['statistics']['videoCount'])
@@ -67,43 +99,11 @@ def main():
         print(vid_link)
         if i == rand_vid_num:
             print(" - the chosen one")
-            webbrowser.open(vid_link)
+            return vid_link
         print()
         i += 1
-        
-    # need to get nextPageToken and pass in as a pageToken to get next n results
-    
-    # need videoID in https://www.youtube.com/watch?v={videoID}
-
-def get_credentials(file):
-    """gets the credentials using an external json client secrets file"""
-    credentials = None
-    
-    if os.path.exists("token.pickle"):
-        print("Loading credentials from file...")
-        with open("token.pickle", "rb") as token:
-            credentials = pickle.load(token)
-
-    # if there are no valid credentials saved then either refresh the token or log in
-    if not credentials or not credentials.valid:
-        if credentials and credentials.expired and credentials.refresh_token:
-            print("Refreshing access token...")
-            credentials.refresh(Request())
-        else:
-            print("Fetching new tokens...")
-            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-                client_secrets_file,
-                scopes
-            )
-            
-            flow.run_local_server(port=8080, prompt="consent")
-            credentials = flow.credentials
-            
-            with open("token.pickle", "wb") as f:
-                print("Saving credentials for future use...")
-                pickle.dump(credentials, f)
-                
-    return credentials
+     
+    # need to get nextPageToken and pass in as a pageToken to get next n results    
 
 if __name__ == "__main__":
     main()
