@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # add our new application
+    'randomvid.apps.RandomvidConfig', # created in /randomvid/apps.py
 ]
 
 MIDDLEWARE = [

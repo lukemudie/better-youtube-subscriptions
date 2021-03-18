@@ -1,0 +1,11 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1><a href="{% url 'index' %}">Random YouTube Video Test</a></h1>
+  <p>This is some test text.</p>
+  <h2>Dynamic content</h2>
+  <p>We will get the channel id:</p>
+  <ul>
+    <li><strong>Channel ID:</strong> {{ channel_id }}</li>
+  </ul>
+{% endblock %}

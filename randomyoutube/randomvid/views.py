@@ -5,4 +5,9 @@ from django.http import HttpResponse
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the randomvid index.")
+    """View function for home page of this site"""
+    context = {
+        'channel_id': 'UCHZqZf6nbTu3hnRtOJwUtkA'
+    }
+    
+    return render(request, 'index.html', context=context)
