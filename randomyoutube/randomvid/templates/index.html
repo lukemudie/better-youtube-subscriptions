@@ -4,8 +4,16 @@
   <h1><a href="{% url 'index' %}">Random YouTube Video Test</a></h1>
   <p>This is some test text.</p>
   <h2>Dynamic content</h2>
-  <p>We will get the channel id:</p>
+  <p>We will get the random information:</p>
   <ul>
     <li><strong>Channel ID:</strong> {{ channel_id }}</li>
+	<li><strong>Video ID:</strong> {{ video_id }}</li>
+	<li><strong>Embed Link:</strong> {{ embed_link }}</li>
   </ul>
+  
+  <iframe width="971" height="546" 
+          src="{{ embed_link }}"
+          frameborder="0" 
+		  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+		  allowfullscreen></iframe>
 {% endblock %}
